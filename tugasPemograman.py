@@ -32,23 +32,19 @@ def fitness(kromosom):
     f = 1/function(x1, x2)+0.01
     return f
 
-# seleksi parent (roulette Wheel)
-def selectParent(populasi, size):
-    total_fitness = 0
+# seleksi parent (tournamen selection)
+def selectParent(populasi, size, tournament_size):
+    parents = []
+    for _ in range(size // 2):
+        # Memilih secara acak sejumlah kromosom untuk turnamen
+        tournament = random.sample(populasi, tournament_size)
 
-    for i in populasi:
-        total_fitness = fitness(i)
+        # Menentukan pemenang turnamen (kromosom dengan fitness tertinggi)
+        winner = max(tournament, key=fitness)
+        
+        parents.append(winner)
     
-    r = random.random()
-    i = 0
-
-    while(r>0):
-        r = r - (fitness(populasi[i])/total_fitness)
-        i = i + 1
-        if (i == (len(populasi)-1)):
-            break
-    parent = populasi[i]
-    return parent
+    return parents
     
 # Crossover dengan metode Whole Arithmetic Crossover (dengan probabilitas 0.8)
 def crossover(parent1, parent2):
@@ -99,10 +95,10 @@ for gen in range(jumlah_generasi):
     parents = []
     for x in range(len(populasi)//2):
 
-        parent1 = selectParent(populasi, len(populasi))
-        parent2 = selectParent(populasi, len(populasi))
-                
-        parents.append((parent1, parent2))
+        tournament_size = 2  # Anda dapat menyesuaikan ukuran turnamen sesuai kebutuhan
+    parent1 = random.choice(selectParent(populasi, len(populasi), tournament_size))
+    parent2 = random.choice(selectParent(populasi, len(populasi), tournament_size))
+    parents.append((parent1, parent2))
         
     new_population = []
 
