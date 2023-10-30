@@ -46,22 +46,33 @@ def selectParent(populasi, size, tournament_size):
     
     return parents
     
-# Crossover dengan metode Whole Arithmetic Crossover (dengan probabilitas 0.8)
+# Crossover dengan metode Oder Crossover (dengan probabilitas 0.8)
 def crossover(parent1, parent2):
     if random.random() < 0.8:
-        i = 0
-        p1 = []
-        p2 = []
-        for _ in range(6):
-            p1.append(0.5*parent1[i] + (1-0.5)*parent2[i])
-            p2.append(0.5*parent1[i] + (1-0.5)*parent2[i])
-            i = i + 1
-        child1 = p1
-        child2 = p2
+        # Pilih dua titik acak
+        points = sorted(random.sample(range(6), 2))
+
+        # Inisialisasi anak dengan None
+        child1 = [None] * 6
+        child2 = [None] * 6
+
+        # Salin bagian antara dua titik dari orang tua 1 ke anak 1
+        child1[points[0]:points[1]] = parent1[points[0]:points[1]]
+
+        # Salin sisa gen dari orang tua 2 ke anak 1
+        idx = points[1]
+        for gen in parent2:
+            if gen not in child1:
+                child1[idx] = gen
+                idx = (idx + 1) % 6
+
+        # Anak 2 adalah kebalikan dari anak 1
+        child2 = [gen if gen is not None else parent2[i] for i, gen in enumerate(child1)]
+
     else:
         child1 = parent1
         child2 = parent2
-    
+
     return child1, child2
 
 # Mutasi dengan metode Uniform Mutation (dengan probabilitas 0.05)
@@ -71,8 +82,8 @@ def mutation(child1, child2):
         child1[i] = random.uniform(0, 1)
 
     if random.random() < 0.05: # Mutasi child dari parent 2
-       i = random.randint(0, 5)
-       child2[i] = random.uniform(0, 1)
+        i = random.randint(0, 5)
+        child2[i] = random.uniform(0, 1)
     
     return child1, child2
 
@@ -91,11 +102,11 @@ mutation_prob = 0.05
 # Seleksi survivor dengan Generational Model
 for gen in range(jumlah_generasi):
 
-    # Seleksi orangtua menggunakan roulette wheel (Fitness proportionate selection)
+
     parents = []
     for x in range(len(populasi)//2):
 
-        tournament_size = 2  # Anda dapat menyesuaikan ukuran turnamen sesuai kebutuhan
+        tournament_size = 2 
     parent1 = random.choice(selectParent(populasi, len(populasi), tournament_size))
     parent2 = random.choice(selectParent(populasi, len(populasi), tournament_size))
     parents.append((parent1, parent2))
@@ -103,7 +114,8 @@ for gen in range(jumlah_generasi):
     new_population = []
 
     for parent1, parent2 in parents:
-        # Crossover dengan metode Whole Arithmetic Crossover (dengan probabilitas 0.8)
+        
+        # Crossover dengan metode Order Crossover (dengan probabilitas 0.8)
 
         child1, child2 = crossover(parent1, parent2)
 
